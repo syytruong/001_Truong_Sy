@@ -9,8 +9,13 @@ var sum_to_n_a = function(n) {
     return sum;
 };
 
-// Using Recursion
+// Using JS function (in this case reduce)
 var sum_to_n_b = function(n) {
+    return Array.from({ length: n }, (_v, k) => k+1).reduce((a, b) => a + b, 0);
+};
+
+// Using Recursion
+var sum_to_n_c = function(n) {
     if (n === 1) {
         return 1;
     }
@@ -18,6 +23,6 @@ var sum_to_n_b = function(n) {
 };
 
 // Using the Arithmetic Progression Formula
-var sum_to_n_c = function(n) {
+var sum_to_n_d = function(n) {
     return (n * (n + 1)) / 2;
 };

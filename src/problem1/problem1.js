@@ -1,3 +1,5 @@
+// Assume param n is a valid positive integer then we can ignore the validation
+
 // Using for loop
 var sum_to_n_a = function(n) {
     var sum = 0;

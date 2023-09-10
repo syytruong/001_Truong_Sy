@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TokenItem } from "../CoinChange";
 
 interface SelectBoxProps {
@@ -12,16 +12,34 @@ function SelectBox(props: SelectBoxProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { items, selectedToken, setSelectedToken } = props;
 
+  const innerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (innerRef.current && !innerRef.current.contains(event.target as Node)) {
+        handleClose();
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [innerRef]);
+
   function renderItems() {
     if (items.length) {
       return items.filter(item => item.currency.toLowerCase().includes(searchTerm.toLowerCase())).map((item, index) => (
         <div
           key={index}
-          className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-200 w-full"
+          className={`flex justify-between items-center p-2 ${selectedToken?.currency === item.currency ? 'cursor-default' : 'cursor-pointer hover:bg-gray-200'} w-full`}
           onClick={() => {
-            setSelectedToken(item);
-            handleClose();
+            if(selectedToken?.currency !== item.currency){
+              setSelectedToken(item);
+              handleClose();
+            }
           }}
+          style={selectedToken?.currency === item.currency ? { pointerEvents: 'none' } : {}}
         >
           <div className="flex items-center w-full">
             <img
@@ -45,7 +63,7 @@ function SelectBox(props: SelectBoxProps) {
         </div>
       ));
     }
-
+  
     return null;
   }
 
@@ -95,7 +113,7 @@ function SelectBox(props: SelectBoxProps) {
 
       {show && (
         <div className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-50 z-[9999]">
-          <div className="bg-white rounded-lg p-4 w-1/3 max-h-[46rem] flex flex-col z-[9999]">
+          <div className="bg-white rounded-lg p-4 w-1/3 max-h-[46rem] flex flex-col z-[9999]" ref={innerRef}>
             <div className="flex justify-between items-center mb-4 w-full">
               <h2>Select a token</h2>
               <button onClick={handleClose}>X</button>

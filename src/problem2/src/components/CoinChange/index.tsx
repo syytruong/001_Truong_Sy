@@ -1,6 +1,48 @@
+import { useEffect, useMemo, useState } from "react";
 import EthLogo from "./../../assets/images/eth.png";
+import SelectBox from "../SelectBox";
+
+export interface TokenItem {
+  currency: string;
+  date: string;
+  price: number;
+}
 
 function CoinChange() {
+  const [ethQuantity, setEthQuantity] = useState<number>(0);
+  const [itemActive, setItemActive] = useState<TokenItem>();
+  const [tokens, setTokens] = useState<TokenItem[]>([]);
+
+  useEffect(() => {
+    const fetchTokens = () => {
+      fetch("https://interview.switcheo.com/prices.json")
+        .then((res) => res.json())
+        .then((list) => {
+          if (list && list.length) {
+            setTokens(list);
+          }
+        });
+    };
+
+    return () => {
+      fetchTokens();
+    };
+  }, []);
+
+  const ethItem = useMemo(() => {
+    if (tokens && tokens.length) {
+      return tokens.find((i: TokenItem) => i.currency.toLowerCase() === "eth");
+    }
+    return;
+  }, [tokens]);
+
+  const tokenExchange = useMemo(() => {
+    if (ethItem && itemActive) {
+      return ((ethQuantity * ethItem.price) / itemActive.price).toFixed(2);
+    }
+    return "";
+  }, [ethQuantity, itemActive, ethItem]);
+
   return (
     <div className="pt-16 px-2 w-[480px]">
       <div className="border border-solid border-[#22222212] pt-3 px-2 rounded-3xl">
@@ -61,7 +103,6 @@ function CoinChange() {
                   <div className="flex flex-1">
                     <input
                       className="opacity-100 transition-opacity duration-[250ms] ease-[ease-in-out] delay-[0s] text-left text-4xl max-h-11 text-[rgb(34,34,34)] pointer-events-auto w-0 relative flex-auto bg-transparent text-[28px] whitespace-nowrap overflow-hidden text-ellipsis p-0 border-0 focus-visible:outline-0"
-                      id="swap-currency-input"
                       inputMode="decimal"
                       autoComplete="off"
                       autoCorrect="off"
@@ -70,33 +111,37 @@ function CoinChange() {
                       minLength={1}
                       maxLength={79}
                       spellCheck="false"
-                      defaultValue=""
+                      value={ethQuantity || ""}
                       placeholder="0"
+                      onChange={(event) => {
+                        setEthQuantity(+event.target.value);
+                      }}
                     />
                   </div>
                   <div className="flex flex-0 relative text-left">
-                  <button
-                    type="button"
-                    className="w-full flex justify-end items-center bg-[#ffffff] opacity-100 text-[#222222] cursor-pointer h-[unset] select-none border text-xl gap-2 shadow-[rgba(34,34,34,0.04)_0px_0px_10px_0px] visible animate-[auto_ease_0s_1_normal_none_running_none] ml-3 pl-2 pr-1.5 py-1.5 rounded-2xl border-solid border-[#22222212] hover:bg-[rgb(249,249,249)]"
-                    id="menu-button"
-                    aria-expanded="true"
-                    aria-haspopup="true"
-                  >
-                    <img src={EthLogo} alt="eth logo" className="h-6 w-6"/> ETH
-                    <svg
-                      className="-mr-1 ml-2 h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
+                    <button
+                      type="button"
+                      className="w-full flex justify-end items-center bg-[#ffffff] opacity-100 text-[#222222] cursor-pointer h-[unset] select-none border text-xl gap-2 shadow-[rgba(34,34,34,0.04)_0px_0px_10px_0px] visible animate-[auto_ease_0s_1_normal_none_running_none] ml-3 pl-2 pr-1.5 py-1.5 rounded-2xl border-solid border-[#22222212] hover:bg-[rgb(249,249,249)]"
+                      id="menu-button"
+                      aria-expanded="true"
+                      aria-haspopup="true"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
+                      <img src={EthLogo} alt="eth logo" className="h-6 w-6" />{" "}
+                      ETH
+                      <svg
+                        className="-mr-1 ml-2 h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -106,7 +151,7 @@ function CoinChange() {
             <div
               data-testid="swap-currency-button"
               color="#222222"
-              className="inline-flex items-center justify-center w-full h-full"
+              className="inline-flex items-center justify-center w-full h-full cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -148,82 +193,16 @@ function CoinChange() {
                     minLength={1}
                     maxLength={79}
                     spellCheck="false"
-                    defaultValue=""
                     placeholder="0"
+                    value={tokenExchange}
+                    readOnly
                   />
                 </div>
-                <div className="flex flex-1 relative text-left">
-                    <button
-                      type="button"
-                      className="w-full flex justify-between items-center bg-[rgb(252,114,255)] opacity-100 text-white cursor-pointer h-[unset] select-none border text-xl gap-2 shadow-[rgba(34,34,34,0.04)_0px_0px_10px_0px] visible animate-[auto_ease_0s_1_normal_none_running_none] ml-3 pl-2 pr-1.5 py-1.5 rounded-2xl border-solid border-[rgb(252,114,255)]"
-                      id="menu-button"
-                      aria-expanded="true"
-                      aria-haspopup="true"
-                    >
-                      Select token
-                      <svg
-                        className="-mr-1 ml-2 h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  {/* <div
-                      className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                      role="menu"
-                      aria-orientation="vertical"
-                      aria-labelledby="menu-button"
-                      tabIndex={-1}
-                    >
-                      <div className="py-1" role="none">
-                        <a
-                          href="#"
-                          className="text-gray-700 block px-4 py-2 text-sm"
-                          role="menuitem"
-                          tabIndex={-1}
-                          id="menu-item-0"
-                        >
-                          Account settings
-                        </a>
-                        <a
-                          href="#"
-                          className="text-gray-700 block px-4 py-2 text-sm"
-                          role="menuitem"
-                          tabIndex={-1}
-                          id="menu-item-1"
-                        >
-                          Support
-                        </a>
-                        <a
-                          href="#"
-                          className="text-gray-700 block px-4 py-2 text-sm"
-                          role="menuitem"
-                          tabIndex={-1}
-                          id="menu-item-2"
-                        >
-                          License
-                        </a>
-                        <form method="POST" action="#" role="none">
-                          <button
-                            type="submit"
-                            className="text-gray-700 block w-full px-4 py-2 text-left text-sm"
-                            role="menuitem"
-                            tabIndex={-1}
-                            id="menu-item-3"
-                          >
-                            Sign out
-                          </button>
-                        </form>
-                      </div>
-                    </div> */}
-                </div>
+                <SelectBox
+                  items={tokens}
+                  itemActive={itemActive}
+                  setItemActive={setItemActive}
+                />
               </div>
             </div>
           </div>

@@ -9,9 +9,10 @@ export interface TokenItem {
 }
 
 function CoinChange() {
-  const [tokenQuantity, setTokenQuantity] = useState<number>(0);
-  const [originToken, setOriginToken] = useState<TokenItem>();
-  const [destinationToken, setDestinationToken] = useState<TokenItem>();
+  const [payTokenQuantity, setPayTokenQuantity] = useState<number>(0);
+  const [payToken, setPayToken] = useState<TokenItem>();
+  const [receiveToken, setDestinationToken] = useState<TokenItem>();
+  const [receiveTokenQuantity, setReceiveTokenQuantity] = useState<number>(0);
   const [tokens, setTokens] = useState<TokenItem[]>([]);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ function CoinChange() {
           setTokens(list);
           const ethToken = list.find((item) => item.currency.toLowerCase() === 'eth');
           if (ethToken) {
-            setOriginToken(ethToken);
+            setPayToken(ethToken);
           }
         }
       } catch (error) {
@@ -36,24 +37,31 @@ function CoinChange() {
 
   function handleSelectChange(item: TokenItem, type: 'origin' | 'destination') {
     if (type === 'origin') {
-      setOriginToken(item);
-      if (destinationToken && item.currency.toLowerCase() === destinationToken.currency.toLowerCase()) {
+      setPayToken(item);
+      if (receiveToken && item.currency.toLowerCase() === receiveToken.currency.toLowerCase()) {
         setDestinationToken(undefined);
       }
     } else if (type === 'destination') {
       setDestinationToken(item);
-      if (originToken && item.currency.toLowerCase() === originToken.currency.toLowerCase()) {
-        setOriginToken(undefined);
+      if (payToken && item.currency.toLowerCase() === payToken.currency.toLowerCase()) {
+        setPayToken(undefined);
       }
     }
   }
 
-  const tokenExchange = useMemo(() => {
-    if (originToken && destinationToken) {
-      return ((tokenQuantity * originToken.price) / destinationToken.price).toFixed(4);
+  const handlePayTokenQuantityChange = (value: number) => {
+    setPayTokenQuantity(value);
+    if (receiveToken && payToken) {
+      setReceiveTokenQuantity(Number(((value * payToken.price) / receiveToken.price).toFixed(4)));
     }
-    return "";
-  }, [tokenQuantity, destinationToken, originToken]);
+  };
+
+  const handleReceiveTokenQuantityChange = (value: number) => {
+    setReceiveTokenQuantity(value);
+    if (receiveToken && payToken) {
+      setPayTokenQuantity(Number(((value * receiveToken.price) / payToken.price).toFixed(4)));
+    }
+  };
 
   return (
     <div className="pt-16 px-2 w-[480px]">
@@ -123,16 +131,16 @@ function CoinChange() {
                       minLength={1}
                       maxLength={79}
                       spellCheck="false"
-                      value={tokenQuantity || ""}
+                      value={payTokenQuantity || ""}
                       placeholder="0"
                       onChange={(event) => {
-                        setTokenQuantity(+event.target.value);
+                        handlePayTokenQuantityChange(+event.target.value);
                       }}
                     />
                   </div>
                   <SelectBox
                     items={tokens}
-                    selectedToken={originToken}
+                    selectedToken={payToken}
                     setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'origin')}
                   />
                 </div>
@@ -189,13 +197,15 @@ function CoinChange() {
                       maxLength={79}
                       spellCheck="false"
                       placeholder="0"
-                      value={tokenExchange}
-                      readOnly
+                      value={receiveTokenQuantity || ""}
+                      onChange={(event) => {
+                        handleReceiveTokenQuantityChange(+event.target.value);
+                      }}
                     />
                   </div>
                   <SelectBox
                     items={tokens}
-                    selectedToken={destinationToken}
+                    selectedToken={receiveToken}
                     setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'destination')}
                   /> 
                 </div>

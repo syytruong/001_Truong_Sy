@@ -1,15 +1,15 @@
 import { ReactNode, useState } from "react";
 import { TokenItem } from "../CoinChange";
 
-interface Props {
-  items: any;
-  itemActive: any;
-  setItemActive: any;
+interface SelectBoxProps {
+  items: TokenItem[];
+  selectedToken: TokenItem | undefined;
+  setSelectedToken: (item: TokenItem) => void;
 }
 
-function SelectBox(props: Props) {
+function SelectBox(props: SelectBoxProps) {
   const [show, setShow] = useState(false);
-  const { items, itemActive, setItemActive } = props;
+  const { items, selectedToken, setSelectedToken } = props;
 
   function renderItems(): ReactNode {
     if (items.length) {
@@ -21,7 +21,7 @@ function SelectBox(props: Props) {
             role="menuitem"
             key={index}
             onClick={() => {
-              setItemActive(item);
+              setSelectedToken(item);
               setShow(false);
             }}
           >
@@ -46,7 +46,7 @@ function SelectBox(props: Props) {
           setShow(true);
         }}
       >
-        {itemActive ? itemActive.currency : "Select token"}
+        {selectedToken ? selectedToken.currency : "Select token"}
         <svg
           className="-mr-1 ml-2 h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"

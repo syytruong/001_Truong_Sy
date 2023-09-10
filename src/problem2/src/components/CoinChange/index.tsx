@@ -9,39 +9,51 @@ export interface TokenItem {
 }
 
 function CoinChange() {
-  const [ethQuantity, setEthQuantity] = useState<number>(0);
-  const [itemActive, setItemActive] = useState<TokenItem>();
+  const [tokenQuantity, setTokenQuantity] = useState<number>(0);
+  const [originToken, setOriginToken] = useState<TokenItem>();
+  const [destinationToken, setDestinationToken] = useState<TokenItem>();
   const [tokens, setTokens] = useState<TokenItem[]>([]);
 
   useEffect(() => {
-    const fetchTokens = () => {
-      fetch("https://interview.switcheo.com/prices.json")
-        .then((res) => res.json())
-        .then((list) => {
-          if (list && list.length) {
-            setTokens(list);
+    const fetchTokens = async () => {
+      try {
+        const res = await fetch("https://interview.switcheo.com/prices.json");
+        const list: TokenItem[] = await res.json();
+        if (list && list.length) {
+          setTokens(list);
+          const ethToken = list.find((item) => item.currency.toLowerCase() === 'eth');
+          if (ethToken) {
+            setOriginToken(ethToken);
           }
-        });
+        }
+      } catch (error) {
+        console.error("Error fetching tokens:", error);
+      }
     };
+  
+    fetchTokens();
+  }, []);  
 
-    return () => {
-      fetchTokens();
-    };
-  }, []);
-
-  const ethItem = useMemo(() => {
-    if (tokens && tokens.length) {
-      return tokens.find((i: TokenItem) => i.currency.toLowerCase() === "eth");
+  function handleSelectChange(item: TokenItem, type: 'origin' | 'destination') {
+    if (type === 'origin') {
+      setOriginToken(item);
+      if (destinationToken && item.currency.toLowerCase() === destinationToken.currency.toLowerCase()) {
+        setDestinationToken(undefined);
+      }
+    } else if (type === 'destination') {
+      setDestinationToken(item);
+      if (originToken && item.currency.toLowerCase() === originToken.currency.toLowerCase()) {
+        setOriginToken(undefined);
+      }
     }
-    return;
-  }, [tokens]);
+  }
 
   const tokenExchange = useMemo(() => {
-    if (ethItem && itemActive) {
-      return ((ethQuantity * ethItem.price) / itemActive.price).toFixed(2);
+    if (originToken && destinationToken) {
+      return ((tokenQuantity * originToken.price) / destinationToken.price).toFixed(4);
     }
     return "";
-  }, [ethQuantity, itemActive, ethItem]);
+  }, [tokenQuantity, destinationToken, originToken]);
 
   return (
     <div className="pt-16 px-2 w-[480px]">
@@ -111,42 +123,26 @@ function CoinChange() {
                       minLength={1}
                       maxLength={79}
                       spellCheck="false"
-                      value={ethQuantity || ""}
+                      value={tokenQuantity || ""}
                       placeholder="0"
                       onChange={(event) => {
-                        setEthQuantity(+event.target.value);
+                        setTokenQuantity(+event.target.value);
                       }}
                     />
                   </div>
                   <div className="flex flex-0 relative text-left">
-                    <button
-                      type="button"
-                      className="w-full flex justify-end items-center bg-[#ffffff] opacity-100 text-[#222222] cursor-pointer h-[unset] select-none border text-xl gap-2 shadow-[rgba(34,34,34,0.04)_0px_0px_10px_0px] visible animate-[auto_ease_0s_1_normal_none_running_none] ml-3 pl-2 pr-1.5 py-1.5 rounded-2xl border-solid border-[#22222212] hover:bg-[rgb(249,249,249)]"
-                      id="menu-button"
-                      aria-expanded="true"
-                      aria-haspopup="true"
-                    >
-                      <img src={EthLogo} alt="eth logo" className="h-6 w-6" />{" "}
-                      ETH
-                      <svg
-                        className="-mr-1 ml-2 h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
+                    <SelectBox
+                      items={tokens}
+                      selectedToken={originToken}
+                      setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'origin')}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Swap origin token with destination token */}
           <div className="h-10 w-10 relative mt-[-18px] mb-[-18px] bg-[rgb(249,249,249)] z-[2] mx-auto rounded-xl border-4 border-solid border-white">
             <div
               data-testid="swap-currency-button"
@@ -198,11 +194,11 @@ function CoinChange() {
                     readOnly
                   />
                 </div>
-                <SelectBox
-                  items={tokens}
-                  itemActive={itemActive}
-                  setItemActive={setItemActive}
-                />
+                  <SelectBox
+                    items={tokens}
+                    selectedToken={destinationToken}
+                    setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'destination')}
+                  />
               </div>
             </div>
           </div>

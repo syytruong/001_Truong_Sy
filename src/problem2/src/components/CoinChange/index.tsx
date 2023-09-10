@@ -105,7 +105,7 @@ function CoinChange() {
           <div className="bg-[rgb(249,249,249)] text-[rgb(125,125,125)] text-sm font-medium h-[120px] leading-5 relative p-4 rounded-2xl">
             <div
               id="swap-currency-input"
-              className="flex flex-col relative z-[1] w-[initial] transition-[height] duration-[1s] ease-[ease] delay-[0s] will-change-[height] rounded-[20px]"
+              className="flex flex-col relative w-[initial] transition-[height] duration-[1s] ease-[ease] delay-[0s] will-change-[height] rounded-[20px]"
             >
               <div className="min-h-[44px] w-[initial] rounded-[20px]">
                 <div className="select-none box-border min-w-0 font-[485] text-sm text-[rgb(125,125,125)] m-0">
@@ -130,13 +130,11 @@ function CoinChange() {
                       }}
                     />
                   </div>
-                  <div className="flex flex-0 relative text-left">
-                    <SelectBox
-                      items={tokens}
-                      selectedToken={originToken}
-                      setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'origin')}
-                    />
-                  </div>
+                  <SelectBox
+                    items={tokens}
+                    selectedToken={originToken}
+                    setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'origin')}
+                  />
                 </div>
               </div>
             </div>
@@ -167,38 +165,40 @@ function CoinChange() {
           </div>
         </div>
 
-        <div className="bg-[rgb(249,249,249)] text-[rgb(125,125,125)] text-sm font-medium h-[120px] leading-5 relative p-4 rounded-2xl">
-          <div
-            id="swap-currency-input"
-            className="flex flex-col relative z-[1] w-[initial] transition-[height] duration-[1s] ease-[ease] delay-[0s] will-change-[height] rounded-[20px]"
-          >
-            <div className="min-h-[44px] w-[initial] rounded-[20px]">
-              <div className="select-none box-border min-w-0 font-[485] text-sm text-[rgb(125,125,125)] m-0">
-                You receive
-              </div>
-              <div className="flex flex-row items-center justify-between">
-                <div className="flex flex-1">
-                  <input
-                    className="opacity-100 transition-opacity duration-[250ms] ease-[ease-in-out] delay-[0s] text-left text-4xl max-h-11 text-[rgb(34,34,34)] pointer-events-auto w-0 relative flex-auto bg-transparent text-[28px] whitespace-nowrap overflow-hidden text-ellipsis p-0 border-0 focus-visible:outline-0"
-                    id="swap-currency-input"
-                    inputMode="decimal"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    type="text"
-                    pattern="^[0-9]*[.,]?[0-9]*$"
-                    minLength={1}
-                    maxLength={79}
-                    spellCheck="false"
-                    placeholder="0"
-                    value={tokenExchange}
-                    readOnly
-                  />
+        <div>
+          <div className="bg-[rgb(249,249,249)] text-[rgb(125,125,125)] text-sm font-medium h-[120px] leading-5 relative p-4 rounded-2xl">
+            <div
+              id="swap-currency-input"
+              className="flex flex-col relative w-[initial] transition-[height] duration-[1s] ease-[ease] delay-[0s] will-change-[height] rounded-[20px]"
+            >
+              <div className="min-h-[44px] w-[initial] rounded-[20px]">
+                <div className="select-none box-border min-w-0 font-[485] text-sm text-[rgb(125,125,125)] m-0">
+                  You receive
                 </div>
+                <div className="flex flex-row items-center justify-between">
+                  <div className="flex flex-1">
+                    <input
+                      className="opacity-100 transition-opacity duration-[250ms] ease-[ease-in-out] delay-[0s] text-left text-4xl max-h-11 text-[rgb(34,34,34)] pointer-events-auto w-0 relative flex-auto bg-transparent text-[28px] whitespace-nowrap overflow-hidden text-ellipsis p-0 border-0 focus-visible:outline-0"
+                      id="swap-currency-input"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      type="text"
+                      pattern="^[0-9]*[.,]?[0-9]*$"
+                      minLength={1}
+                      maxLength={79}
+                      spellCheck="false"
+                      placeholder="0"
+                      value={tokenExchange}
+                      readOnly
+                    />
+                  </div>
                   <SelectBox
                     items={tokens}
                     selectedToken={destinationToken}
                     setSelectedToken={(item: TokenItem) => handleSelectChange(item, 'destination')}
-                  />
+                  /> 
+                </div>
               </div>
             </div>
           </div>

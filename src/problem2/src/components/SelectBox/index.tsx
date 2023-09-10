@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import { TokenItem } from "../CoinChange";
 
 interface SelectBoxProps {
@@ -9,83 +9,112 @@ interface SelectBoxProps {
 
 function SelectBox(props: SelectBoxProps) {
   const [show, setShow] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { items, selectedToken, setSelectedToken } = props;
 
-  function renderItems(): ReactNode {
+  function renderItems() {
     if (items.length) {
-      return items.map((item: TokenItem, index: number) => {
-        return (
-          <a
-            href="#"
-            className="text-gray-700 block px-4 py-2 text-sm"
-            role="menuitem"
-            key={index}
-            onClick={() => {
-              setSelectedToken(item);
-              setShow(false);
-            }}
-          >
-            {item.currency}
-          </a>
-        );
-      });
+      return items.filter(item => item.currency.toLowerCase().includes(searchTerm.toLowerCase())).map((item, index) => (
+        <div
+          key={index}
+          className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-200 w-full"
+          onClick={() => {
+            setSelectedToken(item);
+            handleClose();
+          }}
+        >
+          <div className="flex items-center w-full">
+            <img
+              src={`https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/${item.currency}.svg`}
+              alt={`${item.currency} Icon`}
+              className="w-6 h-6 mr-2"
+            />
+            <span className="flex-grow">{item.currency}</span>
+          </div>
+          {selectedToken?.currency === item.currency && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </div>
+      ));
     }
 
-    return <></>;
+    return null;
   }
 
+  const handleClose = () => {
+    setShow(false);
+    setSearchTerm('');
+  };
+
   return (
-    <div className="flex flex-1 relative text-left">
+    <div>
       <button
         type="button"
-        className="w-full flex justify-between items-center bg-[rgb(252,114,255)] opacity-100 text-white cursor-pointer h-[unset] select-none border text-xl gap-2 shadow-[rgba(34,34,34,0.04)_0px_0px_10px_0px] visible animate-[auto_ease_0s_1_normal_none_running_none] ml-3 pl-2 pr-1.5 py-1.5 rounded-2xl border-solid border-[rgb(252,114,255)]"
-        id="menu-button"
-        aria-expanded="true"
-        aria-haspopup="true"
+        className={`flex items-center justify-between px-4 py-2 rounded-full ${
+          selectedToken ? 'bg-white text-black' : 'bg-[rgb(252,114,255)] text-white'
+        }`}
         onClick={() => {
           setShow(true);
         }}
       >
-        {selectedToken ? selectedToken.currency : "Select token"}
+        {selectedToken ? (
+          <>
+            <img
+              src={`https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/${selectedToken.currency}.svg`}
+              alt={`${selectedToken.currency} Icon`}
+              className="w-6 h-6 mr-2"
+            />
+            <span className="flex-grow">{selectedToken.currency}</span>
+          </>
+        ) : (
+          "Select token"
+        )}
         <svg
-          className="-mr-1 ml-2 h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 ml-2"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
         >
           <path
             fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            d="M5.293 9.293a1 1 0 011.414 0L10 12.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
             clipRule="evenodd"
           />
         </svg>
       </button>
+
+
       {show && (
-        <>
-          <div
-            className={`absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="menu-button"
-          >
-            <div className="py-1 max-h-[400px] overflow-y-scroll" role="none">
+        <div className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-50 z-[9999]">
+          <div className="bg-white rounded-lg p-4 w-1/3 max-h-[46rem] flex flex-col z-[9999]">
+            <div className="flex justify-between items-center mb-4 w-full">
+              <h2>Select a token</h2>
+              <button onClick={handleClose}>X</button>
+            </div>
+            <input
+              type="text"
+              placeholder="Search for a token name"
+              className="p-2 w-full mb-4 border rounded"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="flex flex-wrap justify-between overflow-y-scroll flex-grow">
               {renderItems()}
             </div>
           </div>
-          <div
-            className="fixed top-0 left-0"
-            style={{ height: "100vh", width: "100vw" }}
-            onClick={() => {
-              setShow(false);
-            }}
-          ></div>
-        </>
+        </div>
       )}
     </div>
   );
 }
 
 export default SelectBox;
-
-
